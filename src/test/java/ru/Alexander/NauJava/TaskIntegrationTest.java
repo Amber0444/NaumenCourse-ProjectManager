@@ -1,12 +1,13 @@
 package ru.Alexander.NauJava;
 
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 import ru.Alexander.NauJava.Service.TaskService;
 import ru.Alexander.NauJava.model.Task;
+import ru.Alexander.NauJava.repository.CommentRepository;
 import ru.Alexander.NauJava.repository.TaskCriteriaRepository;
 import ru.Alexander.NauJava.repository.TaskRepository;
 
@@ -15,17 +16,25 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@Transactional
 public class TaskIntegrationTest {
 
     @Autowired
     private TaskRepository taskRepository;
 
     @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
     private TaskCriteriaRepository taskCriteriaRepository;
 
     @Autowired
     private TaskService taskService;
+
+    @AfterEach
+    void tearDown() {
+        commentRepository.deleteAll();
+        taskRepository.deleteAll();
+    }
 
     @Test
     void testCriteriaApi() {
@@ -53,7 +62,7 @@ public class TaskIntegrationTest {
         assertDoesNotThrow(() -> taskService.createTaskWithFirstComment(task, "Нормальный комментарий"));
 
         long countAfterSuccess = taskRepository.count();
-        assertTrue(countAfterSuccess > 0);
+        assertEquals(1, countAfterSuccess);
 
         Task task2 = new Task();
         task2.setTitle("Задача с ошибкой");
